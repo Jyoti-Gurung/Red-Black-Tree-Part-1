@@ -45,12 +45,12 @@ int main(){
           break;
         }
         
-        
+        insert(root, input);
         break;
 
       //PRINT
       case 'B':
-        print(root, 0)
+        print(root, 0);
         break;
       
     }
