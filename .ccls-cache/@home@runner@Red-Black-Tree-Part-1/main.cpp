@@ -48,7 +48,7 @@ public:
   void rightDeleteRotate(Node * x);
   void leftDeleteRotate(Node * x);
   void deleteFix(Node * x, Node * root);
-  void dele
+  void deleteNodeHelper(Node * root, int key);
 
 };
 
@@ -458,9 +458,11 @@ void RBTree::deleteNodeHelper(Node * root, int key) {
     y->color = z->color;
   }
   delete z;
-  if (y_original_color == 0) {
+  
+  //if (y_original_color == 0) {
     deleteFix(x, root);
   }
+
 }
 
 // Link print(root,0), peak(root,0) & deleteNode()  so we can call it from main
@@ -516,8 +518,11 @@ int main() {
     
     // DELETE
     case 'D':
-      cout << "Delete" << endl;
-    
+      cout << "Enter # to Delete: ";
+      int input3;
+      cin >> input3;
+
+      tree.deleteHelp(input3);
       break;
       
     // FILE INSERT
