@@ -274,13 +274,6 @@ void peek(Node *root, int space, int input) {
 
 }
 
-Node * minimum(Node * node) {
-  while (node->left != NULL) {
-    node = node->left;
-  }
-  return node;
-}
-
 void RBTree::leftDeleteRotate(Node * x) {
     Node * y = x->right;
     x->right = y->left;
@@ -459,10 +452,11 @@ void RBTree::deleteNodeHelper(Node * root, int key) {
   }
   delete z;
   
-  //if (y_original_color == 0) {
+  /*
+if (y_original_color == 0) {
     deleteFix(x, root);
   }
-
+*/
 }
 
 // Link print(root,0), peak(root,0) & deleteNode()  so we can call it from main

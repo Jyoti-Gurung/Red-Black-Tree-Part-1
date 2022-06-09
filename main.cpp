@@ -274,13 +274,6 @@ void peek(Node *root, int space, int input) {
 
 }
 
-Node * minimum(Node * node) {
-  while (node->left != NULL) {
-    node = node->left;
-  }
-  return node;
-}
-
 void RBTree::leftDeleteRotate(Node * x) {
     Node * y = x->right;
     x->right = y->left;
@@ -423,7 +416,7 @@ void RBTree::deleteNodeHelper(Node * root, int key) {
     }
     z->left->parent = z->parent;
   } else {
-    y = minimum(z->right);
+    //y = minimum(z->right);
     y_original_color = y->color;
     x = y->right;
     if (y->parent == z) {
