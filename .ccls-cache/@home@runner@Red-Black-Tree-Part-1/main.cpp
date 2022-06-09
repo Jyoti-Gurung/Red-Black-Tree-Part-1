@@ -43,6 +43,13 @@ public:
   RBTree() { root = NULL; }
   void insert(const int &n);
   void printHelp();
+  void peekHelp(int input);
+  void deleteHelp(int input);
+  void rightDeleteRotate(Node * x);
+  void leftDeleteRotate(Node * x);
+  void deleteFix(Node * x, Node * root);
+  void dele
+
 };
 
 // INSERT
@@ -248,8 +255,218 @@ void print(Node *root, int space) {
   print(root->left, space);
 }
 
-// Link print(root,0) so we can call it from main
+// PEEK
+void peek(Node *root, int space, int input) {
+
+  if (root == NULL) {
+    return;
+  }
+
+  // Process right child FIRST
+  peek(root->right, space, input);
+
+  if (root->data == input) {
+    cout << root->data << root->color << " is found! " << endl;
+  }
+
+  // Process left child SECOND
+  peek(root->left, space, input);
+
+}
+
+Node * minimum(Node * node) {
+  while (node->left != NULL) {
+    node = node->left;
+  }
+  return node;
+}
+
+void RBTree::leftDeleteRotate(Node * x) {
+    Node * y = x->right;
+    x->right = y->left;
+    if (y->left != NULL) {
+      y->left->parent = x;
+    }
+    y->parent = x->parent;
+    if (x->parent ==  NULL) {
+      this->root = y;
+    } else if (x == x->parent->left) {
+      x->parent->left = y;
+    } else {
+      x->parent->right = y;
+    }
+    y->left = x;
+    x->parent = y;
+  }
+
+void RBTree::rightDeleteRotate(Node * x) {
+    Node * y = x->left;
+    x->left = y->right;
+    if (y->right != NULL) {
+      y->right->parent = x;
+    }
+    y->parent = x->parent;
+    if (x->parent == nullptr) {
+      this->root = y;
+    } else if (x == x->parent->right) {
+      x->parent->right = y;
+    } else {
+      x->parent->left = y;
+    }
+    y->right = x;
+    x->parent = y;
+  }
+
+void RBTree::deleteFix(Node * x, Node * root) {
+  Node * s;
+  while (x != root && x->color == 0) {
+    if (x == x->parent->left) {
+      s = x->parent->right;
+      if (s->color == 1) {
+        s->color = 0;
+        x->parent->color = 1;
+        leftDeleteRotate(x->parent);
+        s = x->parent->right;
+      }
+
+      if (s->left->color == 0 && s->right->color == 0) {
+        s->color = 1;
+        x = x->parent;
+      } else {
+        if (s->right->color == 0) {
+          s->left->color = 0;
+          s->color = 1;
+          rightDeleteRotate(s);
+          s = x->parent->right;
+        }
+
+        s->color = x->parent->color;
+        x->parent->color = 0;
+        s->right->color = 0;
+        leftDeleteRotate(x->parent);
+        x = root;
+      }
+    } else {
+      s = x->parent->left;
+      if (s->color == 1) {
+        s->color = 0;
+        x->parent->color = 1;
+        rightDeleteRotate(x->parent);
+        s = x->parent->left;
+      }
+
+      if (s->right->color == 0 && s->right->color == 0) {
+        s->color = 1;
+        x = x->parent;
+      } else {
+        if (s->left->color == 0) {
+          s->right->color = 0;
+          s->color = 1;
+          leftDeleteRotate(s);
+          s = x->parent->left;
+        }
+
+        s->color = x->parent->color;
+        x->parent->color = 0;
+        s->left->color = 0;
+        rightDeleteRotate(x->parent);
+        x = root;
+      }
+    }
+  }
+  x->color = 0;
+}
+
+void RBTree::deleteNodeHelper(Node * root, int key) {
+  Node * z = NULL;
+  Node * x;
+  Node * y;
+  while (root != NULL) {
+    if (root->data == key) {
+      z = root;
+    }
+
+    if (root->data <= key) {
+      root = root->right;
+    } else {
+      root = root->left;
+    }
+  }
+
+  if (z == NULL) {
+    cout << "Key not found in the tree" << endl;
+    return;
+  }
+
+  y = z;
+  int y_original_color = y->color;
+  if (z->left == NULL) {
+    x = z->right;
+    // Transplant z & z->right
+    if (z->parent == nullptr) {
+      root = z->right;
+    } else if (z == z->parent->left) {
+      z->parent->left = z->right;
+    } else {
+      z->parent->right = z->right;
+    }
+    z->right->parent = z->parent;
+  } else if (z->right == NULL) {
+    x = z->left;
+    // Transplant z & z->left)
+    if (z->parent == nullptr) {
+      root = z->left;
+    } else if (z == z->parent->left) {
+      z->parent->left = z->left;
+    } else {
+      z->parent->right = z->left;
+    }
+    z->left->parent = z->parent;
+  } else {
+    y = minimum(z->right);
+    y_original_color = y->color;
+    x = y->right;
+    if (y->parent == z) {
+      x->parent = y;
+    } else {
+      // Transplan y & y->right)
+      if (y->parent == nullptr) {
+        root = y->right;
+      } else if (y == y->parent->left) {
+        y->parent->left = y->right;
+      } else {
+        y->parent->right = y->right;
+      }
+      y->right->parent = y->parent;
+      // ^Transplant finished^
+      y->right = z->right;
+      y->right->parent = y;
+    }
+
+    // Transplant z & y
+    if (z->parent == nullptr) {
+      root = y;
+    } else if (z == z->parent->left) {
+      z->parent->left = y;
+    } else {
+      z->parent->right = y;
+    }
+    y->parent = z->parent;
+    // ^Transplant finished^
+    y->left = z->left;
+    y->left->parent = y;
+    y->color = z->color;
+  }
+  delete z;
+  if (y_original_color == 0) {
+    deleteFix(x, root);
+  }
+}
+
+// Link print(root,0), peak(root,0) & deleteNode()  so we can call it from main
 void RBTree::printHelp() { print(root, 0); }
+void RBTree::peekHelp(int input) { peek(root,0, input);}
+void RBTree::deleteHelp(int input) {deleteNodeHelper(root, input);}
 
 int main() {
 
@@ -262,7 +479,7 @@ int main() {
   while (true) {
 
     cout << endl
-         << "Type A to Insert, B to Print, C to Insert File & Print" << endl;
+         << "Type A to Insert, B to Print, C to Peek, D to Delete & E to Insert File & Print" << endl;
     cin >> action;
 
     switch (action) {
@@ -287,8 +504,24 @@ int main() {
       tree.printHelp();
       break;
 
-    // FILE INSERT
+      
+    // PEEK
     case 'C':
+      cout << "Enter # to Peek: ";
+      int input2;
+      cin >> input2;
+
+      tree.peekHelp(input2);
+      break;
+    
+    // DELETE
+    case 'D':
+      cout << "Delete" << endl;
+    
+      break;
+      
+    // FILE INSERT
+    case 'E':
 
       string filename("input.txt");
       int number;
@@ -313,6 +546,7 @@ int main() {
 
       break;
     }
+    
   }
 }
 
